@@ -1,19 +1,16 @@
-// Import the functions you need from the SDKs you need
 import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
 import { Auth, getAuth } from "firebase/auth";
 import { Firestore, getFirestore } from "firebase/firestore";
 import { FirebaseStorage, getStorage } from "firebase/storage";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyAKhRKx641BNGlim9jdqtqbSdILO3GiLbU",
-  authDomain: "tech-challenge-3-9f1ee.firebaseapp.com",
-  projectId: "tech-challenge-3-9f1ee",
-  storageBucket: "tech-challenge-3-9f1ee.firebasestorage.app",
-  messagingSenderId: "855400261531",
-  appId: "1:855400261531:web:c0e93d5da639ca250da33e",
-  measurementId: "G-LNYKPCEQ07",
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 let app: FirebaseApp;
@@ -22,8 +19,7 @@ let db: Firestore;
 let storage: FirebaseStorage;
 
 if (!getApps().length) {
-  const initApp = initializeApp(firebaseConfig);
-  app = initApp;
+  app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   storage = getStorage(app);
   auth = getAuth(app);
