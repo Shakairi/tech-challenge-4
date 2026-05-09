@@ -1,184 +1,119 @@
-import Icon from "@/components/Icon";
-import {
-  getCategoryColor,
-  getCategoryIcon,
-  getCategoryName,
-} from "@/constants/categories";
-import { Colors } from "@/constants/colors";
-import { Icons, IconSizes } from "@/constants/icons";
+/**
+ * TransactionCard.tsx — memoizado
+ *
+ * React.memo evita que o card re-renderize quando o pai atualiza
+ * mas os dados desse item específico não mudaram.
+ *
+ * Sem memo: uma lista de 50 itens re-renderiza 50 cards ao adicionar 1.
+ * Com memo: só o card novo é renderizado.
+ */
 import { Transaction } from "@/types";
 import { formatters } from "@/utils/formatters";
-import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { memo, useCallback } from "react";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface TransactionCardProps {
   transaction: Transaction;
-  onPress?: () => void;
-  onDelete?: () => void;
-  onEdit?: () => void;
+  onPress: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
-export default function TransactionCard({
+// ✅ memo: só re-renderiza se as props mudarem
+const TransactionCard = memo(function TransactionCard({
   transaction,
   onPress,
-  onDelete,
   onEdit,
+  onDelete,
 }: TransactionCardProps) {
   const isIncome = transaction.type === "income";
-  const amountColor = isIncome ? Colors.income : Colors.expense;
-  const amountPrefix = isIncome ? "+ " : "- ";
-  const categoryIcon = getCategoryIcon(transaction.category);
-  const categoryName = getCategoryName(transaction.category);
-  const categoryColor = getCategoryColor(transaction.category);
+  const amountColor = isIncome ? "#28a745" : "#d32f2f";
+  const amountPrefix = isIncome ? "+" : "-";
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <View style={styles.contentContainer}>
-        <View
-          style={[
-            styles.categoryIcon,
-            { backgroundColor: categoryColor + "20" },
-          ]}
-        >
-          <Icon
-            name={categoryIcon}
-            size={IconSizes.medium}
-            color={categoryColor}
-          />
-        </View>
-
-        <View style={styles.infoContainer}>
-          <Text style={styles.category}>{categoryName}</Text>
-          <Text style={styles.description} numberOfLines={1}>
-            {transaction.description}
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
+      <View style={styles.leftSection}>
+        <View style={[styles.typeIndicator, { backgroundColor: isIncome ? "#d4edda" : "#f8d7da" }]}>
+          <Text style={[styles.typeIcon, { color: amountColor }]}>
+            {isIncome ? "↑" : "↓"}
           </Text>
+        </View>
+        <View style={styles.info}>
+          <Text style={styles.category} numberOfLines={1}>
+            {transaction.category}
+          </Text>
+          {transaction.description ? (
+            <Text style={styles.description} numberOfLines={1}>
+              {transaction.description}
+            </Text>
+          ) : null}
           <Text style={styles.date}>
-            {formatters.formatDate(transaction.date, "short")}
+            {new Date(transaction.date).toLocaleDateString("pt-BR")}
           </Text>
-        </View>
-
-        <View style={styles.amountContainer}>
-          <Text style={[styles.amount, { color: amountColor }]}>
-            {amountPrefix}
-            {formatters.formatCurrency(transaction.amount, false)}
-          </Text>
-          {transaction.receiptUrl && (
-            <Icon name={Icons.receipt} size={IconSizes.medium} color="#666" />
-          )}
         </View>
       </View>
 
-      {onEdit || onDelete ? (
-        <View style={styles.actionsContainer}>
-          {onEdit && (
-            <TouchableOpacity
-              style={[styles.actionButton, styles.editButton]}
-              onPress={onEdit}
-            >
-              <Icon name={Icons.edit} size={IconSizes.medium} color="#1976D2" />
-            </TouchableOpacity>
-          )}
-          {onDelete && (
-            <TouchableOpacity
-              style={[styles.actionButton, styles.deleteButton]}
-              onPress={onDelete}
-              activeOpacity={0.6}
-            >
-              <Icon
-                name={Icons.delete}
-                size={IconSizes.medium}
-                color="#D32F2F"
-              />
-            </TouchableOpacity>
-          )}
+      <View style={styles.rightSection}>
+        <Text style={[styles.amount, { color: amountColor }]}>
+          {amountPrefix} {formatters.formatCurrency(transaction.amount)}
+        </Text>
+        <View style={styles.actions}>
+          <TouchableOpacity onPress={onEdit} style={styles.actionButton}>
+            <Text style={styles.actionEdit}>✏️</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onDelete} style={styles.actionButton}>
+            <Text style={styles.actionDelete}>🗑️</Text>
+          </TouchableOpacity>
         </View>
-      ) : null}
+      </View>
     </TouchableOpacity>
   );
-}
+});
+
+export default TransactionCard;
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    marginBottom: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.primary,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  contentContainer: {
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 14,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  categoryIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  leftSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    marginRight: 8,
+  },
+  typeIndicator: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
   },
-  iconText: {
-    fontSize: 24,
-  },
-  infoContainer: {
-    flex: 1,
-  },
-  category: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: Colors.text,
-    marginBottom: 4,
-  },
-  description: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    marginBottom: 4,
-  },
-  date: {
-    fontSize: 12,
-    color: Colors.textTertiary,
-  },
-  amountContainer: {
-    alignItems: "flex-end",
-  },
-  amount: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-  receiptIcon: {
-    fontSize: 14,
-  },
-  actionsContainer: {
-    flexDirection: "row",
-    marginTop: 12,
-    gap: 8,
-  },
-  actionButton: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 6,
-    alignItems: "center",
-  },
-  editButton: {
-    backgroundColor: "#E3F2FD",
-  },
-  deleteButton: {
-    backgroundColor: "#FFEBEE",
-  },
-  actionText: {
-    fontSize: 16,
-  },
+  typeIcon: { fontSize: 18, fontWeight: "bold" },
+  info: { flex: 1 },
+  category: { fontSize: 14, fontWeight: "600", color: "#333", marginBottom: 2 },
+  description: { fontSize: 12, color: "#888", marginBottom: 2 },
+  date: { fontSize: 11, color: "#bbb" },
+  rightSection: { alignItems: "flex-end" },
+  amount: { fontSize: 14, fontWeight: "700", marginBottom: 6 },
+  actions: { flexDirection: "row", gap: 4 },
+  actionButton: { padding: 4 },
+  actionEdit: { fontSize: 14 },
+  actionDelete: { fontSize: 14 },
 });
