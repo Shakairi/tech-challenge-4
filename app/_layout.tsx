@@ -1,7 +1,7 @@
 import {
-    DarkTheme,
-    DefaultTheme,
-    ThemeProvider,
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -10,6 +10,8 @@ import "react-native-reanimated";
 import { AuthProvider } from "@/context/AuthContext";
 import { TransactionsProvider } from "@/context/TransactionsContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useAppStartup } from "@/hooks/useAppStartup";
+import { View } from "react-native";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -17,6 +19,14 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+
+  // Pré-carregamento de fontes e imagens
+  const { isReady } = useAppStartup();
+
+  // Mantém a splash screen visível até tudo estar pronto
+  if (!isReady) {
+    return <View style={{ flex: 1, backgroundColor: "#fff" }} />;
+  }
 
   return (
     <AuthProvider>
