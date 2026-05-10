@@ -20,7 +20,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
 
-// ─── Helper de conversão ──────────────────────────
+// ─── Helper de conversão ────────────────
 
 function docToTransaction(id: string, data: any): Transaction {
   return {
@@ -32,7 +32,7 @@ function docToTransaction(id: string, data: any): Transaction {
   } as Transaction;
 }
 
-// ─── Repository ───────────────────────────────────
+// ─── Repository ─────────────────────────
 
 export const transactionRepository = {
   async add(
